@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Sorter {
     private static int countDataLoss;
-    private static ComparatorObj comparatorObj = new ComparatorObj(ArgsParser.isAscendingMode());
+    private static ComparatorObj comparatorObj = new ComparatorObj();
 
     public static int getCountDataLoss() {
         return countDataLoss;
@@ -18,22 +18,14 @@ public class Sorter {
 
     public static void sortObjects(List<Scanner> scanners, FileWriter writer, boolean isIntegerMode) throws IOException {
         countDataLoss = 0;
-        comparatorObj.setAscendingMode(ArgsParser.isAscendingMode());
+        comparatorObj.setAscendingMode(ArgsParser.getArgsParser().isAscendingMode());
         List<Object> buffer = new ArrayList<>(scanners.size());
         for (int i = 0; i < scanners.size(); i++) {
             if (scanners.get(i).hasNextInt() & isIntegerMode) {
                 buffer.add(scanners.get(i).nextInt());
             } else if (scanners.get(i).hasNextLine() & !isIntegerMode) {
                 buffer.add(scanners.get(i).nextLine());
-                while (((String) buffer.get(i)).contains(" ")) {
-                    countDataLoss++;
-                    if (scanners.get(i).hasNextLine()) {
-                        buffer.set(i, scanners.get(i).nextLine());
-                    } else {
-                        buffer.set(i, null);
-                        break;
-                    }
-                }
+                processMessyDataStr(null, i, scanners, buffer);
             } else {
                 buffer.add(null);
             }
@@ -46,17 +38,17 @@ public class Sorter {
             writer.write(String.valueOf(desiredValue) + "\n");
             if ((scanners.get(desiredIndex).hasNextInt() & isIntegerMode)) {
                 buffer.set(desiredIndex, scanners.get(desiredIndex).nextInt());
-                checkMessyDataInt(desiredValue, desiredIndex, scanners, buffer);
+                processMessyDataInt(desiredValue, desiredIndex, scanners, buffer);
             } else if (scanners.get(desiredIndex).hasNextLine() & !isIntegerMode) {
                 buffer.set(desiredIndex, scanners.get(desiredIndex).nextLine());
-                checkMessyDataStr(desiredValue, desiredIndex, scanners, buffer);
+                processMessyDataStr(desiredValue, desiredIndex, scanners, buffer);
             } else {
                 buffer.set(desiredIndex, null);
             }
         }
     }
 
-    public static void checkMessyDataInt(Object desiredValue, int desiredIndex, List<Scanner> scanners, List buffer) {
+    public static void processMessyDataInt(Object desiredValue, int desiredIndex, List<Scanner> scanners, List buffer) {
         while (comparatorObj.compare(desiredValue, buffer.get(desiredIndex)) > 0) {
             countDataLoss++;
             if (scanners.get(desiredIndex).hasNextInt()) {
@@ -68,8 +60,12 @@ public class Sorter {
         }
     }
 
-    public static void checkMessyDataStr(Object desiredValue, int desiredIndex, List<Scanner> scanners, List buffer) {
-        while ((comparatorObj.compare(desiredValue, buffer.get(desiredIndex)) > 0) | ((String) buffer.get(desiredIndex)).contains(" ")) {
+    public static void processMessyDataStr(Object desiredValue, int desiredIndex, List<Scanner> scanners, List buffer) {
+        boolean dataUnsorted = false;
+        if (desiredValue != null) {
+            dataUnsorted = (comparatorObj.compare(desiredValue, buffer.get(desiredIndex)) > 0);
+        }
+        while (dataUnsorted | ((String) buffer.get(desiredIndex)).contains(" ")) {
             countDataLoss++;
             if (scanners.get(desiredIndex).hasNextLine()) {
                 buffer.set(desiredIndex, scanners.get(desiredIndex).nextLine());

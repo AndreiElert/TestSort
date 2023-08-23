@@ -8,12 +8,21 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+// Singleton pattern
 public class ArgsParser {
+    private static ArgsParser argsParser;
     private static boolean ascendingMode;
     private static boolean stringMode;
     private static boolean integerMode;
     private static String outputFile = new String();
     private static Set inputFiles = new LinkedHashSet<>();
+
+    public static synchronized ArgsParser getArgsParser() {
+        if (argsParser == null) {
+            argsParser = new ArgsParser();
+        }
+        return argsParser;
+    }
 
     public static boolean isAscendingMode() {
         return ascendingMode;

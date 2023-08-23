@@ -5,10 +5,6 @@ import java.util.Comparator;
 public class ComparatorObj implements Comparator<Object> {
     private boolean ascendingMode;
 
-    public ComparatorObj(boolean ascendingMode) {
-        this.ascendingMode = ascendingMode;
-    }
-
     public void setAscendingMode(boolean ascendingMode) {
         this.ascendingMode = ascendingMode;
     }
